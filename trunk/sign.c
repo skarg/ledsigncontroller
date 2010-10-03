@@ -31,8 +31,7 @@
 #include "bits.h"
 #include "sign.h"
 
-/* task timer */
-#define TIMER_INTERVAL 1
+/* timer for testing */
 static struct itimer Timer;
 
 /* text that is displayed on sign */
@@ -67,17 +66,26 @@ void sign_character_set(uint8_t x_in, char ch)
     uint8_t x = 0, y = 0;
     uint8_t width = 0;
     uint8_t bitmap = 0;
+    uint8_t mask = 0;
+    bool status = 0;
 
     if (x_in < SIGN_X_MAX) {
         for (y = 0; y < SIGN_Y_MAX; y++) {
             bitmap = font_bitmap(ch, y);
             width = font_width(ch);
+            BIT_SET(mask, 7);
             for (x = x_in; x < SIGN_X_MAX; x++) {
-                sign_bitmap_set(x, y, BIT_CHECK(bitmap, x));
+                if (bitmap & mask) {
+                    status = true;
+                } else {
+                    status = false;
+                }
+                sign_bitmap_set(x, y, status);
                 width--;
                 if (width == 0) {
                     break;
                 }
+                mask = mask>>1;
             }
         }
     }
@@ -94,6 +102,38 @@ void sign_clear(void)
     }
 }
 
+static void sign_test(void)
+{
+    static unsigned state = 0;
+
+    sign_clear();
+    switch (state) {
+        case 0:
+            sign_character_set(0, ' ');
+            break;
+        case 1:
+            sign_character_set(0, '#');
+            break;
+        case 2:
+            sign_character_set(0, '!');
+            break;
+        case 3:
+            sign_character_set(0, '"');
+            break;
+        case 4:
+            sign_character_set(0, '$');
+            break;
+        case 5:
+            sign_character_set(0, '%');
+            break;
+        default:
+            state = 0;
+            break;
+    }
+    state++;
+}
+
+
 void sign_task(void)
 {
     static uint8_t last_y = 0;
@@ -102,31 +142,33 @@ void sign_task(void)
     static uint8_t x = 0;
 
     /* handle the communication timer */
+    led_off(last_y, last_x);
+    /* adjust next x, y */
+    x++;
+    if (x >= SIGN_X_MAX) {
+        x = 0;
+        y++;
+        if (y >= SIGN_Y_MAX) {
+            y = 0;
+        }
+    }
+    /* set the pixel if lit */
+    if (sign_bitmap(x, y)) {
+        led_on(y, x);
+    } else {
+        led_off(y, x);
+    }
+    last_y = y;
+    last_x = x;
+
     if (timer_interval_expired(&Timer)) {
         timer_interval_reset(&Timer);
-        led_off(last_y, last_x);
-        /* adjust next x, y */
-        x++;
-        if (x >= SIGN_X_MAX) {
-            x = 0;
-            y++;
-            if (y >= SIGN_Y_MAX) {
-                y = 0;
-            }
-        }
-        /* set the pixel if lit */
-        if (sign_bitmap(x, y)) {
-            led_on(y, x);
-        } else {
-            led_off(y, x);
-        }
-        last_y = y;
-        last_x = x;
+        sign_test();
     }
 }
 
 void sign_init(void)
 {
-    timer_interval_start(&Timer, TIMER_INTERVAL);
-    sign_character_set(0, '#');
+    timer_interval_start(&Timer, 1000);
+    sign_character_set(0, ' ');
 }
