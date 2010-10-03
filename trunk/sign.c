@@ -1,0 +1,132 @@
+/*####COPYRIGHTBEGIN####
+ ---------------------------------------------------------------
+ Copyright (C) 2010 Steve Karg <skarg@users.sourceforge.net>
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ ---------------------------------------------------------------
+####COPYRIGHTEND####*/
+#include <stdbool.h>
+#include <stdint.h>
+#include "hardware.h"
+#include "timer.h"
+#include "font.h"
+#include "led.h"
+#include "bits.h"
+#include "sign.h"
+
+/* task timer */
+#define TIMER_INTERVAL 1
+static struct itimer Timer;
+
+/* text that is displayed on sign */
+static char Sign_Text[16];
+
+/* sign dimensions */
+#define SIGN_X_MAX 16
+#define SIGN_Y_MAX 5
+/* bitmap of text on sign */
+static bool Sign_Bitmap[SIGN_X_MAX][SIGN_Y_MAX];
+
+static bool sign_bitmap(uint8_t x, uint8_t y)
+{
+    bool bit_status = false;
+
+    if ((x < SIGN_X_MAX) && (y < SIGN_Y_MAX)) {
+        bit_status = Sign_Bitmap[x][y];
+    }
+
+    return bit_status;
+}
+
+static void sign_bitmap_set(uint8_t x, uint8_t y, bool state)
+{
+    if ((x < SIGN_X_MAX) && (y < SIGN_Y_MAX)) {
+        Sign_Bitmap[x][y] = state;
+    }
+}
+
+void sign_character_set(uint8_t x_in, char ch)
+{
+    uint8_t x = 0, y = 0;
+    uint8_t width = 0;
+    uint8_t bitmap = 0;
+
+    if (x_in < SIGN_X_MAX) {
+        for (y = 0; y < SIGN_Y_MAX; y++) {
+            bitmap = font_bitmap(ch, y);
+            width = font_width(ch);
+            for (x = x_in; x < SIGN_X_MAX; x++) {
+                sign_bitmap_set(x, y, BIT_CHECK(bitmap, x));
+                width--;
+                if (width == 0) {
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void sign_clear(void)
+{
+    uint8_t x, y;
+
+    for (x = 0; x < SIGN_X_MAX; x++) {
+        for (y = 0; y < SIGN_Y_MAX; y++) {
+            Sign_Bitmap[x][y] = false;
+        }
+    }
+}
+
+void sign_task(void)
+{
+    static uint8_t last_y = 0;
+    static uint8_t last_x = 0;
+    static uint8_t y = 0;
+    static uint8_t x = 0;
+
+    /* handle the communication timer */
+    if (timer_interval_expired(&Timer)) {
+        timer_interval_reset(&Timer);
+        led_off(last_y, last_x);
+        /* adjust next x, y */
+        x++;
+        if (x >= SIGN_X_MAX) {
+            x = 0;
+            y++;
+            if (y >= SIGN_Y_MAX) {
+                y = 0;
+            }
+        }
+        /* set the pixel if lit */
+        if (sign_bitmap(x, y)) {
+            led_on(y, x);
+        } else {
+            led_off(y, x);
+        }
+        last_y = y;
+        last_x = x;
+    }
+}
+
+void sign_init(void)
+{
+    timer_interval_start(&Timer, TIMER_INTERVAL);
+    sign_character_set(0, '#');
+}
