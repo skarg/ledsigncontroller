@@ -49,12 +49,23 @@ static struct font_info font_8x5_bitmaps[MAX_BITMAPS] =
     {8, {0x44, 0xA8, 0x54, 0x2A, 0x44}},
 };
 
+static bool font_character_valid(char ch) 
+{
+    bool status = false;
+
+    if ((ch >= ' ') && (ch <= '%')) {
+        status = true;
+    }
+
+    return status;
+}
+
 uint8_t font_width(char ch)
 {
     uint8_t width = 0;
     uint8_t offset = 0;
 
-    if ((ch >= ' ') && (ch <= '"')) {
+    if (font_character_valid(ch)) {
         offset = ch - ' ';
         if (offset < MAX_BITMAPS) {
             width = font_8x5_bitmaps[offset].width;
@@ -69,7 +80,7 @@ uint8_t font_bitmap(char ch, uint8_t y)
     uint8_t bitmap = 0;
     uint8_t offset = 0;
 
-    if ((ch >= ' ') && (ch <= '"')) {
+    if (font_character_valid(ch)) {
         offset = ch - ' ';
         if ((offset < MAX_BITMAPS) &&
             (y < MAX_BIT_Y)) {
