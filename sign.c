@@ -73,7 +73,7 @@ void sign_character_set(uint8_t x_in, char ch)
         for (y = 0; y < SIGN_Y_MAX; y++) {
             bitmap = font_bitmap(ch, y);
             width = font_width(ch);
-            BIT_SET(mask, 7);
+            mask = 0x80;
             for (x = x_in; x < SIGN_X_MAX; x++) {
                 if (bitmap & mask) {
                     status = true;
@@ -102,7 +102,7 @@ void sign_clear(void)
     }
 }
 
-static void sign_test(void)
+static void sign_test1(void)
 {
     static char ch = ' ';
 
@@ -115,6 +115,19 @@ static void sign_test(void)
     }
 }
 
+static void sign_test2(void)
+{
+    static uint8_t x = 0;
+    uint8_t width = 0;
+
+    sign_clear();
+    sign_character_set(x, 127);
+    if (x < SIGN_X_MAX) {
+        x++;
+    } else {
+        x = 0;
+    }
+}
 
 void sign_task(void)
 {
@@ -145,12 +158,12 @@ void sign_task(void)
 
     if (timer_interval_expired(&Timer)) {
         timer_interval_reset(&Timer);
-        sign_test();
+        sign_test2();
     }
 }
 
 void sign_init(void)
 {
-    timer_interval_start(&Timer, 1000);
-    sign_character_set(0, ' ');
+    timer_interval_start(&Timer, 500);
+    snprintf(Sign_Text, sizeof(Sign_Text), "JOSHUA");
 }
