@@ -233,7 +233,7 @@ static bool font_character_valid(char ch)
 {
     bool status = false;
 
-    if ((ch >= ' ') && (ch <= '%')) {
+    if ((ch >= 32) && (ch <= 127)) {
         status = true;
     }
 
