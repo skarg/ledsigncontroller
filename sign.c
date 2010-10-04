@@ -104,33 +104,15 @@ void sign_clear(void)
 
 static void sign_test(void)
 {
-    static unsigned state = 0;
+    static char ch = ' ';
 
     sign_clear();
-    switch (state) {
-        case 0:
-            sign_character_set(0, ' ');
-            break;
-        case 1:
-            sign_character_set(0, '#');
-            break;
-        case 2:
-            sign_character_set(0, '!');
-            break;
-        case 3:
-            sign_character_set(0, '"');
-            break;
-        case 4:
-            sign_character_set(0, '$');
-            break;
-        case 5:
-            sign_character_set(0, '%');
-            break;
-        default:
-            state = 0;
-            break;
+    sign_character_set(0, ch);
+    if (ch == 127) {
+        ch = ' ';
+    } else {
+        ch++;
     }
-    state++;
 }
 
 
