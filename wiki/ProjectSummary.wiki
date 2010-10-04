@@ -1,0 +1,10 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+This project is an LED sign controller, which controls individual LEDs and displays characters or strings, and does scrolling and blinking.  It is a simple hardware design based on AVR microcontroller.
+
+= Details =
+
+Font based on ASCII table - this site has details:
+http://www.asciitable.com/
