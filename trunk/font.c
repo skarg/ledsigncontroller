@@ -31,7 +31,7 @@ struct font_info {
     uint8_t map[MAX_BIT_Y];
 };
 
-#define MAX_BITMAPS 95
+#define MAX_BITMAPS 96
 /* Character bitmaps for Arial 8pt */
 static struct font_info font_8x5_bitmaps[MAX_BITMAPS] =
 {
@@ -225,6 +225,8 @@ static struct font_info font_8x5_bitmaps[MAX_BITMAPS] =
     {4, {0x40, 0x20, 0x60, 0x20, 0x40}},
     /*'~' */
     {4, {0xE0, 0x90, 0x09, 0x07, 0x00}}
+    /* DEL */
+    {8, {0xFF, 0xFF, 0xFF, 0xFF, 0xFF}}
 };
 
 static bool font_character_valid(char ch)
