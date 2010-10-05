@@ -33,11 +33,11 @@ extern "C" {
 #endif /* __cplusplus */
 
     void led_on(
-        uint8_t row,
-        uint8_t column);
+        uint8_t x,
+        uint8_t y);
     void led_off(
-        uint8_t row,
-        uint8_t column);
+        uint8_t x,
+        uint8_t y);
 
     void led_init(
         void);
