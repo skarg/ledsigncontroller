@@ -34,6 +34,7 @@ extern "C" {
 
 void sign_init(void);
 void sign_task(void);
+void sign_timer_handler(void);
 void sign_character_set(uint8_t x_in, char ch);
 void sign_clear(void);
 

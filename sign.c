@@ -30,6 +30,7 @@
 #include "led.h"
 #include "bits.h"
 #include "sign.h"
+#include "timer0.h"
 
 /* timer for testing */
 static struct itimer Timer;
@@ -38,10 +39,10 @@ static struct itimer Timer;
 static char Sign_Text[16];
 
 /* sign dimensions */
-#define SIGN_X_MAX 16
+#define SIGN_X_MAX 17
 #define SIGN_Y_MAX 5
 /* bitmap of text on sign */
-static bool Sign_Bitmap[SIGN_X_MAX][SIGN_Y_MAX];
+static volatile bool Sign_Bitmap[SIGN_X_MAX][SIGN_Y_MAX];
 
 static bool sign_bitmap(uint8_t x, uint8_t y)
 {
@@ -118,7 +119,6 @@ static void sign_test1(void)
 static void sign_test2(void)
 {
     static uint8_t x = 0;
-    uint8_t width = 0;
 
     sign_clear();
     sign_character_set(x, 127);
@@ -131,13 +131,20 @@ static void sign_test2(void)
 
 void sign_task(void)
 {
+    if (timer_interval_expired(&Timer)) {
+        timer_interval_reset(&Timer);
+        sign_test2();
+    }
+}
+
+void sign_timer_handler(void)
+{
     static uint8_t last_y = 0;
     static uint8_t last_x = 0;
     static uint8_t y = 0;
     static uint8_t x = 0;
 
-    /* handle the communication timer */
-    led_off(last_y, last_x);
+    led_off(last_x, last_y);
     /* adjust next x, y */
     x++;
     if (x >= SIGN_X_MAX) {
@@ -149,21 +156,17 @@ void sign_task(void)
     }
     /* set the pixel if lit */
     if (sign_bitmap(x, y)) {
-        led_on(y, x);
+        led_on(x, y);
     } else {
-        led_off(y, x);
+        led_off(x, y);
     }
     last_y = y;
     last_x = x;
-
-    if (timer_interval_expired(&Timer)) {
-        timer_interval_reset(&Timer);
-        sign_test2();
-    }
 }
 
 void sign_init(void)
 {
-    timer_interval_start(&Timer, 500);
-    snprintf(Sign_Text, sizeof(Sign_Text), "JOSHUA");
+    timer0_init();
+    timer_interval_start(&Timer, 100);
+//    snprintf(Sign_Text, sizeof(Sign_Text), "JOSHUA");
 }
