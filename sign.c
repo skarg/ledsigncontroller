@@ -37,9 +37,10 @@
 static struct itimer Timer;
 
 /* text that is displayed on sign */
-static char Sign_Text[32];
+static char Sign_Text[64];
 
-static uint32_t Pixel_Motion_Delay_Milliseconds = 50;
+/* number of columns to space between letters */
+#define SCROLL_GAP 2
 
 /* sign dimensions */
 #define SIGN_X_MAX 17
@@ -120,7 +121,7 @@ void sign_full_bright(void)
     }
 }
 
-static void sign_test1(void)
+static void sign_test_characters(void)
 {
     static char ch = ' ';
 
@@ -133,7 +134,7 @@ static void sign_test1(void)
     }
 }
 
-static void sign_test2(void)
+static void sign_test_bar_side(void)
 {
     static int x = 0;
     static bool reverse = false;
@@ -156,7 +157,7 @@ static void sign_test2(void)
     }
 }
 
-static void sign_test3(void)
+static void sign_test_full_bright(void)
 {
     static bool clear = false;
     if (clear) {
@@ -168,18 +169,60 @@ static void sign_test3(void)
     }
 }
 
-static void sign_test4(void)
+static void sign_test_bottom(void)
 {
-    sign_full_bright();
+    static int x = -8;
+
+    sign_clear();
+    sign_character_set(x, '_');
+    if (x < SIGN_X_MAX) {
+        x++;
+    } else {
+        x = -8;
+    }
 }
+
+static void sign_scroll_name(void)
+{
+    static int scroll_x = SIGN_X_MAX - 1;
+    uint8_t i = 0;
+    int width = 0;
+    int x = 0;
+    char ch = ' ';
+    unsigned len = 0;
+    int end_x = 0;
+
+    sign_clear();
+    x = scroll_x;
+    len = strlen(Sign_Text);
+    for (i = 0; i < len; i++) {
+        ch = Sign_Text[i];
+        if (ch == 0) {
+            break;
+        }
+        sign_character_set(x, ch);
+        width = font_width(ch);
+        end_x -= width;
+        x += width;
+    }
+    if (scroll_x == end_x) {
+        scroll_x = SIGN_X_MAX - 1;
+    } else {
+        scroll_x--;
+    }
+}
+
+void sign_scroll_name_set(char *name)
+{
+    sprintf(Sign_Text, "%s", name);
+}
+
 
 void sign_task(void)
 {
     if (timer_interval_expired(&Timer)) {
         timer_interval_reset(&Timer);
-        //sign_test2();
-        sign_test3();
-        //sign_test4();
+        sign_scroll_name();
     }
 }
 
@@ -214,7 +257,9 @@ void sign_timer_handler(void)
 void sign_init(void)
 {
     timer0_init();
-//    timer_interval_start(&Timer, 50);
-    timer_interval_start(&Timer, 500);
-    sprintf(Sign_Text, "JOSHUA");
+    timer_interval_start(&Timer, 100);
+//    timer_interval_start(&Timer, 500);
+//    sign_scroll_name_set("MARIO");
+//    sign_scroll_name_set("DAFT PUNK");
+    sign_scroll_name_set("THE QUICK BROWN FOX JUMPED OVER THE LAZY DOGS");
 }
