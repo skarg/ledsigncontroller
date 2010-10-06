@@ -28,6 +28,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef enum {
+    SIGN_SCANNER = 0,
+    SIGN_STRING = 1,
+    SIGN_BLINK = 2,
+    SIGN_FULL_BRIGHT = 3,
+    SIGN_CLEAR = 4,
+    SIGN_STATE_MAX = 5
+} SIGN_STATE;
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -35,9 +44,10 @@ extern "C" {
 void sign_init(void);
 void sign_task(void);
 void sign_timer_handler(void);
-void sign_character_set(int x, char ch);
+void sign_character_set(char ch);
 void sign_scroll_name_set(char *name);
 void sign_clear(void);
+void sign_state_set(SIGN_STATE state);
 
 #ifdef __cplusplus
 }

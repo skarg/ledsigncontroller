@@ -29,7 +29,58 @@
 #include "timer.h"
 #include "led.h"
 #include "sign.h"
+#include "button.h"
 #include "watchdog.h"
+
+static char *Phrases[] = {
+    "DAFT PUNK",
+    "HUMAN AFTER ALL",
+    "WORK IT  MAKE IT  DO IT    MAKES US"
+    "HARDER   BETTER   FASTER   STRONGER",
+    "ROCK   ROBOT ROCK",
+    "--+--+--+--+",
+    "``````",
+    "HELLO WORLD",
+    "GO CAVS",
+    "TELEVISION RULES THE NATION",
+    NULL
+};
+
+static void main_task(void)
+{
+    static unsigned phrase_index = 0;
+    static bool full_bright = false;
+    uint8_t value;
+    char *phrase = NULL;
+
+    if (button_value_changed()) {
+        value = button_value();
+        if (BIT_CHECK(value, 1)) {
+            phrase = Phrases[phrase_index];
+            if (phrase == NULL) {
+                phrase_index = 0;
+                phrase = Phrases[0];
+            } else {
+                phrase_index++;
+            }
+            sign_scroll_name_set(phrase);
+            sign_state_set(SIGN_STRING);
+        } else if (BIT_CHECK(value, 2)) {
+            if (full_bright) {
+                full_bright = false;
+                sign_state_set(SIGN_FULL_BRIGHT);
+            } else {
+                full_bright = true;
+                sign_state_set(SIGN_SCANNER);
+            }   
+        } 
+#if 0
+        else if (BIT_CHECK(value, 0)) {
+            sign_state_set(SIGN_BLINK);   
+        }
+#endif
+    }
+}
 
 int main(
     void)
@@ -37,11 +88,14 @@ int main(
     init();
     timer_init();
     led_init();
+    button_init();
     sign_init();
     /* Enable global interrupts */
     __enable_interrupt();
     for (;;) {
         watchdog_reset();
+        button_task();
         sign_task();
+        main_task();
     }
 }
