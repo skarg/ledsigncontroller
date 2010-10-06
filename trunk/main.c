@@ -72,13 +72,10 @@ static void main_task(void)
             } else {
                 full_bright = true;
                 sign_state_set(SIGN_SCANNER);
-            }   
-        } 
-#if 0
-        else if (BIT_CHECK(value, 0)) {
-            sign_state_set(SIGN_BLINK);   
+            }
+        } else if (BIT_CHECK(value, 0)) {
+            sign_state_set(SIGN_BLINK);
         }
-#endif
     }
 }
 
