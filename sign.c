@@ -24,6 +24,7 @@
 ####COPYRIGHTEND####*/
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "hardware.h"
 #include "timer.h"
 #include "font.h"
@@ -36,7 +37,9 @@
 static struct itimer Timer;
 
 /* text that is displayed on sign */
-static char Sign_Text[16];
+static char Sign_Text[32];
+
+static uint32_t Pixel_Motion_Delay_Milliseconds = 50;
 
 /* sign dimensions */
 #define SIGN_X_MAX 17
@@ -62,9 +65,10 @@ static void sign_bitmap_set(uint8_t x, uint8_t y, bool state)
     }
 }
 
-void sign_character_set(uint8_t x_in, char ch)
+/* allow off sign characters using negative x_in */
+void sign_character_set(int x_in, char ch)
 {
-    uint8_t x = 0, y = 0;
+    int x = 0, y = 0;
     uint8_t width = 0;
     uint8_t bitmap = 0;
     uint8_t mask = 0;
@@ -81,7 +85,9 @@ void sign_character_set(uint8_t x_in, char ch)
                 } else {
                     status = false;
                 }
-                sign_bitmap_set(x, y, status);
+                if (x >= 0) {
+                    sign_bitmap_set(x, y, status);
+                }
                 width--;
                 if (width == 0) {
                     break;
@@ -103,6 +109,17 @@ void sign_clear(void)
     }
 }
 
+void sign_full_bright(void)
+{
+    uint8_t x, y;
+
+    for (x = 0; x < SIGN_X_MAX; x++) {
+        for (y = 0; y < SIGN_Y_MAX; y++) {
+            Sign_Bitmap[x][y] = true;
+        }
+    }
+}
+
 static void sign_test1(void)
 {
     static char ch = ' ';
@@ -118,25 +135,55 @@ static void sign_test1(void)
 
 static void sign_test2(void)
 {
-    static uint8_t x = 0;
+    static int x = 0;
+    static bool reverse = false;
 
     sign_clear();
     sign_character_set(x, 127);
     if (x < SIGN_X_MAX) {
-        x++;
+        if (reverse) {
+            if (x == -8) {
+                reverse = false;
+            } else {
+                x--;
+            }
+        } else {
+            x++;
+        }
     } else {
-        x = 0;
+        reverse = true;
+        x = SIGN_X_MAX - 1;
     }
+}
+
+static void sign_test3(void)
+{
+    static bool clear = false;
+    if (clear) {
+        sign_clear();
+        clear = false;
+    } else {
+        sign_full_bright();
+        clear = true;
+    }
+}
+
+static void sign_test4(void)
+{
+    sign_full_bright();
 }
 
 void sign_task(void)
 {
     if (timer_interval_expired(&Timer)) {
         timer_interval_reset(&Timer);
-        sign_test2();
+        //sign_test2();
+        sign_test3();
+        //sign_test4();
     }
 }
 
+/* note: called by interrupt handler */
 void sign_timer_handler(void)
 {
     static uint8_t last_y = 0;
@@ -167,6 +214,7 @@ void sign_timer_handler(void)
 void sign_init(void)
 {
     timer0_init();
-    timer_interval_start(&Timer, 100);
-//    snprintf(Sign_Text, sizeof(Sign_Text), "JOSHUA");
+//    timer_interval_start(&Timer, 50);
+    timer_interval_start(&Timer, 500);
+    sprintf(Sign_Text, "JOSHUA");
 }

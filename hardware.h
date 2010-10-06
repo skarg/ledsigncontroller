@@ -35,8 +35,8 @@
 #endif
 
 #if defined(__GNUC__)
-#if !defined(__AVR_ATmega644P__)
-#error Firmware is configured for ATmega644P only (-mmcu=atmega644p)
+#if !defined(__AVR_ATmega324P__)
+#error Firmware is configured for ATmega324P only (-mmcu=atmega324p)
 #endif
     /* GCC specific configuration */
 #include <avr/wdt.h>
