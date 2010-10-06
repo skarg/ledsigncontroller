@@ -59,7 +59,7 @@ static uint8_t button_value_raw(void)
     uint8_t value;
 
     /* MSB x, x, x, x, x, PC1, PC0, PB5 LSB */
-    value = (BITMASK_CHECK(PINC, 0x03) << 1) | BITMASK_CHECK(PINB, 0x20);
+    value = (BITMASK_CHECK(PINC, 0x03) << 1) | (BITMASK_CHECK(PINB, 0x20)>>5);
     value = ~value;
     value = BITMASK_CHECK(value, 0x07);
 
