@@ -37,24 +37,24 @@ static void led_row_on(
 {
     switch (index) {
         case 0:
-            BIT_SET(DDRB, DDB4);
-            BIT_SET(PORTB, PB4);
+            BIT_SET(DDRB, DDB0);
+            BIT_SET(PORTB, PB0);
             break;
         case 1:
-            BIT_SET(DDRB, DDB3);
-            BIT_SET(PORTB, PB3);
+            BIT_SET(DDRB, DDB1);
+            BIT_SET(PORTB, PB1);
             break;
         case 2:
             BIT_SET(DDRB, DDB2);
             BIT_SET(PORTB, PB2);
             break;
         case 3:
-            BIT_SET(DDRB, DDB1);
-            BIT_SET(PORTB, PB1);
+            BIT_SET(DDRB, DDB3);
+            BIT_SET(PORTB, PB3);
             break;
         case 4:
-            BIT_SET(DDRB, DDB0);
-            BIT_SET(PORTB, PB0);
+            BIT_SET(DDRB, DDB4);
+            BIT_SET(PORTB, PB4);
             break;
         default:
             break;
@@ -71,24 +71,24 @@ static void led_row_off(
 {
     switch (index) {
         case 0:
-            BIT_SET(DDRB, DDB4);
-            BIT_CLEAR(PORTB, PB4);
+            BIT_SET(DDRB, DDB0);
+            BIT_CLEAR(PORTB, PB0);
             break;
         case 1:
-            BIT_SET(DDRB, DDB3);
-            BIT_CLEAR(PORTB, PB3);
+            BIT_SET(DDRB, DDB1);
+            BIT_CLEAR(PORTB, PB1);
             break;
         case 2:
             BIT_SET(DDRB, DDB2);
             BIT_CLEAR(PORTB, PB2);
             break;
         case 3:
-            BIT_SET(DDRB, DDB1);
-            BIT_CLEAR(PORTB, PB1);
+            BIT_SET(DDRB, DDB3);
+            BIT_CLEAR(PORTB, PB3);
             break;
         case 4:
-            BIT_SET(DDRB, DDB0);
-            BIT_CLEAR(PORTB, PB0);
+            BIT_SET(DDRB, DDB4);
+            BIT_CLEAR(PORTB, PB4);
             break;
         default:
             break;
@@ -105,24 +105,24 @@ static void led_row_float(
 {
     switch (index) {
         case 0:
-            BIT_CLEAR(PORTB, PB4);
-            BIT_CLEAR(DDRB, DDB4);
+            BIT_CLEAR(PORTB, PB0);
+            BIT_CLEAR(DDRB, DDB0);
             break;
         case 1:
-            BIT_CLEAR(PORTB, PB3);
-            BIT_CLEAR(DDRB, DDB3);
+            BIT_CLEAR(PORTB, PB1);
+            BIT_CLEAR(DDRB, DDB1);
             break;
         case 2:
             BIT_CLEAR(PORTB, PB2);
             BIT_CLEAR(DDRB, DDB2);
             break;
         case 3:
-            BIT_CLEAR(PORTB, PB1);
-            BIT_CLEAR(DDRB, DDB1);
+            BIT_CLEAR(PORTB, PB3);
+            BIT_CLEAR(DDRB, DDB3);
             break;
         case 4:
-            BIT_CLEAR(PORTB, PB0);
-            BIT_CLEAR(DDRB, DDB0);
+            BIT_CLEAR(PORTB, PB4);
+            BIT_CLEAR(DDRB, DDB4);
             break;
         default:
             break;
@@ -139,32 +139,32 @@ static void led_column_off(
 {
     switch (index) {
         case 0:
-            BIT_SET(DDRD, DDD4);
-            BIT_CLEAR(PORTD, PD4);
-            break;
-        case 1:
-            BIT_SET(DDRD, DDD5);
-            BIT_CLEAR(PORTD, PD5);
-            break;
-        case 2:
-            BIT_SET(DDRD, DDD6);
-            BIT_CLEAR(PORTD, PD6);
-            break;
-        case 3:
             BIT_SET(DDRD, DDD7);
             BIT_CLEAR(PORTD, PD7);
             break;
+        case 1:
+            BIT_SET(DDRD, DDD6);
+            BIT_CLEAR(PORTD, PD6);
+            break;
+        case 2:
+            BIT_SET(DDRD, DDD5);
+            BIT_CLEAR(PORTD, PD5);
+            break;
+        case 3:
+            BIT_SET(DDRD, DDD4);
+            BIT_CLEAR(PORTD, PD4);
+            break;
         case 4:
+            BIT_SET(DDRD, DDD3);
+            BIT_CLEAR(PORTD, PD3);
+            break;
+        case 5:
             BIT_SET(DDRB, DDB7);
             BIT_CLEAR(PORTB, PB7);
             break;
-        case 5:
+        case 6:
             BIT_SET(DDRB, DDB6);
             BIT_CLEAR(PORTB, PB6);
-            break;
-        case 6:
-            BIT_SET(DDRB, DDB5);
-            BIT_CLEAR(PORTB, PB5);
             break;
         case 7:
             BIT_SET(DDRC, DDC6);
@@ -221,32 +221,32 @@ static void led_column_on(
 {
     switch (index) {
         case 0:
-            BIT_SET(DDRD, DDD4);
-            BIT_SET(PORTD, PD4);
-            break;
-        case 1:
-            BIT_SET(DDRD, DDD5);
-            BIT_SET(PORTD, PD5);
-            break;
-        case 2:
-            BIT_SET(DDRD, DDD6);
-            BIT_SET(PORTD, PD6);
-            break;
-        case 3:
             BIT_SET(DDRD, DDD7);
             BIT_SET(PORTD, PD7);
             break;
+        case 1:
+            BIT_SET(DDRD, DDD6);
+            BIT_SET(PORTD, PD6);
+            break;
+        case 2:
+            BIT_SET(DDRD, DDD5);
+            BIT_SET(PORTD, PD5);
+            break;
+        case 3:
+            BIT_SET(DDRD, DDD4);
+            BIT_SET(PORTD, PD4);
+            break;
         case 4:
+            BIT_SET(DDRD, DDD3);
+            BIT_SET(PORTD, PD3);
+            break;
+        case 5:
             BIT_SET(DDRB, DDB7);
             BIT_SET(PORTB, PB7);
             break;
-        case 5:
+        case 6:
             BIT_SET(DDRB, DDB6);
             BIT_SET(PORTB, PB6);
-            break;
-        case 6:
-            BIT_SET(DDRB, DDB5);
-            BIT_SET(PORTB, PB5);
             break;
         case 7:
             BIT_SET(DDRC, DDC6);
@@ -303,32 +303,32 @@ static void led_column_float(
 {
     switch (index) {
         case 0:
-            BIT_CLEAR(PORTD, PD4);
-            BIT_CLEAR(DDRD, DDD4);
-            break;
-        case 1:
-            BIT_CLEAR(PORTD, PD5);
-            BIT_CLEAR(DDRD, DDD5);
-            break;
-        case 2:
-            BIT_CLEAR(PORTD, PD6);
-            BIT_CLEAR(DDRD, DDD6);
-            break;
-        case 3:
             BIT_CLEAR(PORTD, PD7);
             BIT_CLEAR(DDRD, DDD7);
             break;
+        case 1:
+            BIT_CLEAR(PORTD, PD6);
+            BIT_CLEAR(DDRD, DDD6);
+            break;
+        case 2:
+            BIT_CLEAR(PORTD, PD5);
+            BIT_CLEAR(DDRD, DDD5);
+            break;
+        case 3:
+            BIT_CLEAR(PORTD, PD4);
+            BIT_CLEAR(DDRD, DDD4);
+            break;
         case 4:
+            BIT_CLEAR(PORTD, PD3);
+            BIT_CLEAR(DDRD, DDD3);
+            break;
+        case 5:
             BIT_CLEAR(PORTB, PB7);
             BIT_CLEAR(DDRB, DDB7);
             break;
-        case 5:
+        case 6:
             BIT_CLEAR(PORTB, PB6);
             BIT_CLEAR(DDRB, DDB6);
-            break;
-        case 6:
-            BIT_CLEAR(PORTB, PB5);
-            BIT_CLEAR(DDRB, DDB5);
             break;
         case 7:
             BIT_CLEAR(PORTC, PC6);
