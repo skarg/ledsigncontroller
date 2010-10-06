@@ -36,6 +36,7 @@ void sign_init(void);
 void sign_task(void);
 void sign_timer_handler(void);
 void sign_character_set(int x, char ch);
+void sign_scroll_name_set(char *name);
 void sign_clear(void);
 
 #ifdef __cplusplus
