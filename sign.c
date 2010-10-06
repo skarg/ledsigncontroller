@@ -25,6 +25,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include "hardware.h"
 #include "timer.h"
 #include "font.h"
@@ -33,11 +34,14 @@
 #include "sign.h"
 #include "timer0.h"
 
+static SIGN_STATE Sign_State;
+static SIGN_STATE Sign_Next_State;
+
 /* timer for testing */
 static struct itimer Timer;
 
-/* text that is displayed on sign */
-static char Sign_Text[64];
+/* character that is displayed on the sign */
+static char Sign_Character = '-';
 
 /* number of columns to space between letters */
 #define SCROLL_GAP 2
@@ -47,6 +51,23 @@ static char Sign_Text[64];
 #define SIGN_Y_MAX 5
 /* bitmap of text on sign */
 static volatile bool Sign_Bitmap[SIGN_X_MAX][SIGN_Y_MAX];
+
+/* text that is displayed on sign */
+static char Sign_Text[128];
+/* the x position of the name */
+static int Name_Scroll_X = SIGN_X_MAX - 1;
+
+void sign_state_set(SIGN_STATE state)
+{
+    if (state < SIGN_STATE_MAX) {
+        Sign_State = state;
+    }
+}
+
+void sign_character_set(char ch)
+{
+    Sign_Character = ch;
+}
 
 static bool sign_bitmap(uint8_t x, uint8_t y)
 {
@@ -67,7 +88,7 @@ static void sign_bitmap_set(uint8_t x, uint8_t y, bool state)
 }
 
 /* allow off sign characters using negative x_in */
-void sign_character_set(int x_in, char ch)
+static void sign_character_x(int x_in, char ch)
 {
     int x = 0, y = 0;
     uint8_t width = 0;
@@ -110,7 +131,7 @@ void sign_clear(void)
     }
 }
 
-void sign_full_bright(void)
+static void sign_full_bright(void)
 {
     uint8_t x, y;
 
@@ -126,7 +147,7 @@ static void sign_test_characters(void)
     static char ch = ' ';
 
     sign_clear();
-    sign_character_set(0, ch);
+    sign_character_x(0, ch);
     if (ch == 127) {
         ch = ' ';
     } else {
@@ -134,16 +155,20 @@ static void sign_test_characters(void)
     }
 }
 
-static void sign_test_bar_side(void)
+static void sign_scroll_character(char ch)
 {
     static int x = 0;
     static bool reverse = false;
+    int width = 0;
+    int end_x = 0;
 
     sign_clear();
-    sign_character_set(x, 127);
+    sign_character_x(x, ch);
+    width = font_width(ch);
+    end_x -= width;
     if (x < SIGN_X_MAX) {
         if (reverse) {
-            if (x == -8) {
+            if (x == end_x) {
                 reverse = false;
             } else {
                 x--;
@@ -157,7 +182,7 @@ static void sign_test_bar_side(void)
     }
 }
 
-static void sign_test_full_bright(void)
+static void sign_full_bright_blink(void)
 {
     static bool clear = false;
     if (clear) {
@@ -174,7 +199,7 @@ static void sign_test_bottom(void)
     static int x = -8;
 
     sign_clear();
-    sign_character_set(x, '_');
+    sign_character_x(x, '_');
     if (x < SIGN_X_MAX) {
         x++;
     } else {
@@ -184,7 +209,6 @@ static void sign_test_bottom(void)
 
 static void sign_scroll_name(void)
 {
-    static int scroll_x = SIGN_X_MAX - 1;
     uint8_t i = 0;
     int width = 0;
     int x = 0;
@@ -193,36 +217,79 @@ static void sign_scroll_name(void)
     int end_x = 0;
 
     sign_clear();
-    x = scroll_x;
+    x = Name_Scroll_X;
     len = strlen(Sign_Text);
     for (i = 0; i < len; i++) {
         ch = Sign_Text[i];
         if (ch == 0) {
             break;
         }
-        sign_character_set(x, ch);
+        sign_character_x(x, ch);
         width = font_width(ch);
         end_x -= width;
         x += width;
     }
-    if (scroll_x == end_x) {
-        scroll_x = SIGN_X_MAX - 1;
+    if (Name_Scroll_X == end_x) {
+        Name_Scroll_X = SIGN_X_MAX - 1;
     } else {
-        scroll_x--;
+        Name_Scroll_X--;
     }
 }
 
 void sign_scroll_name_set(char *name)
 {
     sprintf(Sign_Text, "%s", name);
+    Name_Scroll_X = SIGN_X_MAX - 1;
 }
 
 
 void sign_task(void)
 {
+    static SIGN_STATE state = SIGN_SCANNER;
+
     if (timer_interval_expired(&Timer)) {
         timer_interval_reset(&Timer);
-        sign_scroll_name();
+        if (Sign_State != state) {
+            /* change of state */
+            state = Sign_State;
+            switch (state) {
+                case SIGN_SCANNER:
+                    timer_interval_start(&Timer, 120);
+                    break;
+                case SIGN_STRING:
+                    timer_interval_start(&Timer, 100);
+                    break;
+                case SIGN_BLINK:
+                    timer_interval_start(&Timer, 500);
+                    break;
+                case SIGN_FULL_BRIGHT:
+                    break;
+                case SIGN_CLEAR:
+                    break;
+                default:
+                    break;
+            }
+        }
+        switch (state) {
+            case SIGN_SCANNER:
+                sign_scroll_character(Sign_Character);
+                break;
+            case SIGN_STRING:
+                sign_scroll_name();
+                break;
+            case SIGN_BLINK:
+                sign_full_bright_blink();
+                break;
+            case SIGN_FULL_BRIGHT:
+                sign_full_bright();
+                break;
+            case SIGN_CLEAR:
+                sign_clear();
+                break;
+            default:
+                break;
+        }
+            
     }
 }
 
@@ -258,8 +325,5 @@ void sign_init(void)
 {
     timer0_init();
     timer_interval_start(&Timer, 100);
-//    timer_interval_start(&Timer, 500);
-//    sign_scroll_name_set("MARIO");
-//    sign_scroll_name_set("DAFT PUNK");
-    sign_scroll_name_set("THE QUICK BROWN FOX JUMPED OVER THE LAZY DOGS");
+//    sign_scroll_name_set("THE QUICK BROWN FOX JUMPED OVER THE LAZY DOGS");
 }
