@@ -3,9 +3,9 @@
 ###############################################################################
 
 ## General Flags
-MCU = atmega644p
-AVRDUDE_MCU = m644p
-# ATmega644 bootload is at word address 7000h, 7800h, 7C00h, or 7E00h
+MCU = atmega324p
+AVRDUDE_MCU = m324p
+# ATmega324 bootload is at word address 7000h, 7800h, 7C00h, or 7E00h
 # Double that value to get the byte address
 BOOTLOAD = 0xF800
 TARGET = led_sign
@@ -17,7 +17,7 @@ OBJDUMP = avr-objdump
 SIZE = avr-size
 AVRDUDE = avrdude
 LINT = splint
-LINT_MCU = __AVR_ATmega644p__
+LINT_MCU = __AVR_ATmega324p__
 
 SIZE_OPTIONS = -t
 #SIZE_OPTIONS = -C --mcu=${MCU}
@@ -48,11 +48,13 @@ AVRDUDE_PORT = usb
 CSRC = main.c \
 	fuses.c \
 	init.c \
+	timer0.c \
 	timer2.c \
 	timer.c \
 	led.c \
 	sign.c \
 	font.c \
+	button.c \
 	watchdog.c
 
 ## Include Directories
@@ -244,7 +246,7 @@ showfuses:
 clean:
 	-rm -rf $(OBJECTS) $(TARGET_ELF) dep/*
 	-rm -rf $(COREOBJ)
-	-rm -rf $(TARGET).hex $(TARGET).bin $(TARGET).eep 
+	-rm -rf $(TARGET).hex $(TARGET).bin $(TARGET).eep
 	-rm -rf $(TARGET).lst $(TARGET).map
 
 ## Other dependencies
