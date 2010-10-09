@@ -49,7 +49,7 @@ static char *Phrases[] = {
 static void main_task(void)
 {
     static unsigned phrase_index = 0;
-    static bool full_bright = false;
+    static unsigned full_bright = 0;
     uint8_t value;
     char *phrase = NULL;
 
@@ -66,12 +66,25 @@ static void main_task(void)
             sign_scroll_name_set(phrase);
             sign_state_set(SIGN_STRING);
         } else if (BIT_CHECK(value, 2)) {
-            if (full_bright) {
-                full_bright = false;
-                sign_state_set(SIGN_FULL_BRIGHT);
-            } else {
-                full_bright = true;
+            if (full_bright == 0) {
+                full_bright++;
+                sign_character_set('=');
                 sign_state_set(SIGN_SCANNER);
+            } else if (full_bright == 1) {
+                full_bright++;
+                sign_character_set('-');
+                sign_state_set(SIGN_SCANNER);
+            } else if (full_bright == 2) {
+                full_bright++;
+                sign_character_set('*');
+                sign_state_set(SIGN_SCANNER);
+            } else if (full_bright == 3) {
+                full_bright++;
+                sign_character_set(127);
+                sign_state_set(SIGN_SCANNER);
+            } else {
+                full_bright = 0;
+                sign_state_set(SIGN_FULL_BRIGHT);
             }
         } else if (BIT_CHECK(value, 0)) {
             sign_state_set(SIGN_BLINK);
