@@ -33,7 +33,8 @@
 #endif
 
 /* Timer2 Prescaling: 1, 8, 64, 256, or 1024 */
-#define TIMER_TICKS(p) (F_CPU/(p)/5000)
+#define TIMER_MICROSECONDS 200
+#define TIMER_TICKS(p) ((((F_CPU)/(p))*(TIMER_MICROSECONDS))/1000000)
 #define TIMER_TICKS_MAX 0xff
 /* adjust the prescaler for the processor clock */
 #if (TIMER_TICKS(1) <= TIMER_TICKS_MAX)
