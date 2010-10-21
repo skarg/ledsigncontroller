@@ -31,7 +31,8 @@
 #error "F_CPU must be defined for Timer configuration."
 #endif
 /* Timer2 Prescaling: 1, 8, 32, 64, 128, 256, or 1024 */
-#define TIMER_TICKS(p) (F_CPU/(p)/1000)
+#define TIMER_MICROSECONDS 1000
+#define TIMER_TICKS(p) ((((F_CPU)/(p)/1000)*(TIMER_MICROSECONDS))/1000)
 #define TIMER_TICKS_MAX 0xff
 /* adjust the prescaler for the processor clock */
 #if (TIMER_TICKS(1) <= TIMER_TICKS_MAX)
