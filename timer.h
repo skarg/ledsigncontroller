@@ -49,8 +49,6 @@ extern "C" {
         void);
     uint32_t timer_milliseconds(
         void);
-    uint32_t timer_milliseconds_set(
-        uint32_t value);
 
     /* these functions are in the generic timer.c module */
 

@@ -74,26 +74,6 @@ ISR(TIMER2_OVF_vect)
 }
 
 /*************************************************************************
-* Description: sets the current time count with a value
-* Returns: none
-* Notes: none
-*************************************************************************/
-uint32_t timer_milliseconds_set(
-    uint32_t value)
-{
-    uint8_t sreg = 0;   /* holds interrupts pending */
-    uint32_t old_value = 0;     /* return value */
-
-    sreg = SREG;
-    __disable_interrupt();
-    old_value = Millisecond_Counter;
-    Millisecond_Counter = value;
-    SREG = sreg;
-
-    return old_value;
-}
-
-/*************************************************************************
 * Description: returns the current millisecond count
 * Returns: none
 * Notes: none
@@ -102,12 +82,12 @@ uint32_t timer_milliseconds(
     void)
 {
     uint32_t timer_value = 0;   /* return value */
-    uint8_t sreg = 0;   /* holds interrupts pending */
 
-    sreg = SREG;
-    __disable_interrupt();
+    /* Disable the interrupt so our data won't corrupt if interrupted. */
+    BIT_CLEAR(TIMSK2, TOIE2);
     timer_value = Millisecond_Counter;
-    SREG = sreg;
+    /* Re-enable the overflow interrupt */
+    BIT_SET(TIMSK2, TOIE2);
 
     return timer_value;
 }
@@ -151,8 +131,8 @@ void timer_init(
 #else
 #error Timer2 Prescale: Invalid Value
 #endif
-    /* Clear any TOV Flag set when the timer overflowed */
-    BIT_CLEAR(TIFR2, TOV2);
+    /* Clear any TOV Flag set when the timer overflowed - by setting it! */
+    BIT_SET(TIFR2, TOV2);
     /* Initial value */
     TCNT2 = TIMER2_COUNT;
     /* Enable the overflow interrupt */
