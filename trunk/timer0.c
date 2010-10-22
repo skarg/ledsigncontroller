@@ -78,7 +78,7 @@ ISR(TIMER0_OVF_vect)
 void timer0_init(
     void)
 {
-    /* Normal Operation */
+    /* Normal Operation - counting up */
     TCCR0A = 0;
     /* Timer2: prescale selections:
        CSn2 CSn1 CSn0 Description
@@ -105,8 +105,8 @@ void timer0_init(
 #else
 #error Timer0 Prescale: Invalid Value
 #endif
-    /* Clear any TOV Flag set when the timer overflowed */
-    BIT_CLEAR(TIFR0, TOV0);
+    /* Clear any TOV Flag set when the timer overflowed - by setting it! */
+    BIT_SET(TIFR0, TOV0);
     /* Initial value */
     TCNT0 = TIMER0_COUNT;
     /* Enable the overflow interrupt */
